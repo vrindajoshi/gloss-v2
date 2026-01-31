@@ -11,20 +11,28 @@
     <h1>📰 Article Scraper</h1>
 
     <div class="input-section">
-      <input id="urlInput" type="text" placeholder="Enter article URL" value="https://www.bbc.com/news/articles/czr4jn4621lo">
+      <input id="urlInput" type="text" placeholder="Enter article URL">
       <button id="scrapeBtn">Scrape</button>
     </div>
 
-    <div id="loading" class="loading">⏳ Scraping article...</div>
+    
+    <div id="gradeButtons" class="grade-buttons hidden">
+      <button id="grade3">Grade3</button>
+      <button id="grade9">Grade9</button>
+      <button id="college">College</button>
+    </div>
+
+    <div id="loading" class="loading"><span id="loadingText">⏳ Loading...</span></div>
     <div id="error" class="error"></div>
 
     <div id="outputSection" class="output-section">
       <div id="articleTitle" class="article-title"></div>
       <div id="articleBody" class="article-body"></div>
-      <button id="downloadBtn" class="download-btn">⬇️ Download as Text</button>
     </div>
+
   </div>
 
   <script src="popup.js"></script>
+  <script type="module" src="popup.mjs"></script>
 </body>
 </html>

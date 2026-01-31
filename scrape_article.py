@@ -77,6 +77,7 @@ def scrape(url):
     soup = BeautifulSoup(html, 'html.parser')
     title = extract_title(soup)
     article = extract_article_text(soup)
+    
     # Clean up weird characters and control codes (preserve paragraph breaks)
     def clean_text(s):
         if not s:
