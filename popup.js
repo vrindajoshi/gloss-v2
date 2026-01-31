@@ -6,6 +6,7 @@ const outputSection = document.getElementById('outputSection');
 const articleTitle = document.getElementById('articleTitle');
 const articleBody = document.getElementById('articleBody');
 const downloadBtn = document.getElementById('downloadBtn');
+const gradeButtons = document.getElementById('gradeButtons');
 
 let currentFormatted = null;
 let currentUrl = '';
@@ -33,15 +34,16 @@ scrapeBtn.addEventListener('click', () => {
   scrapeArticle();
 });
 
-urlInput.addEventListener('change', (e) => {
-  updateUrl(e.target.value);
+grade3.addEventListener('click', () => {
+  convertGradeThree();
 });
 
-urlInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    updateUrl(e.target.value);
-    scrapeArticle();
-  }
+grade9.addEventListener('click', () => {
+  convertGradeThree();
+});
+
+college.addEventListener('click', () => {
+  convertCollege();
 });
 
 async function scrapeArticle() {
@@ -89,9 +91,15 @@ function clearError() {
 
 function hideOutput() {
   outputSection.classList.remove('active');
+  if (gradeButtons) {
+    gradeButtons.classList.add('hidden');
+  }
 }
 
 function showOutput() {
   outputSection.classList.add('active');
+  if (gradeButtons) {
+    gradeButtons.classList.remove('hidden');
+  }
 }
 
