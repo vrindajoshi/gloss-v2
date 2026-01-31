@@ -76,7 +76,7 @@ async function translateReadingLevel(text, level) {
     
     // Add timeout to fetch
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 30 second timeout
     
     const resp = await fetch(`http://localhost:3000/translate?text=${encodedText}&level=${encodedLevel}`, {
       signal: controller.signal
