@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Gloss",
+  "version": "1.0.0",
+  "description": "A softer way to read. Simplify articles and listen with text-to-speech.",
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "action": {
+    "default_popup": "dist/index.html"
+  },
+  "icons": {
+    "16": "icons/GlossLogo16.png",
+    "48": "icons/GlossLogo48.png",
+    "128": "icons/GlossLogo128.png"
+  }
+}

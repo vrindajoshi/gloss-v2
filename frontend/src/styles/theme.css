@@ -1,0 +1,62 @@
+@theme {
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  
+  --color-pink-50: #fdf2f8;
+  --color-pink-100: #fce7f3;
+  --color-pink-200: #fbcfe8;
+  --color-pink-300: #f9a8d4;
+  --color-pink-400: #f472b6;
+  --color-pink-600: #db2777;
+  --color-pink-800: #9f1239;
+  
+  --color-orange-50: #fff7ed;
+  --color-orange-100: #ffedd5;
+  --color-orange-200: #fed7aa;
+  --color-orange-300: #fdba74;
+  --color-orange-400: #fb923c;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea580c;
+  --color-orange-700: #c2410c;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@layer base {
+  * {
+    border-color: theme('colors.neutral.200');
+  }
+
+  body {
+    color: theme('colors.neutral.900');
+    background-color: theme('colors.neutral.50');
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Dyslexia-friendly font */
+  .font-dyslexic {
+    font-family: 'OpenDyslexic', 'Comic Sans MS', Arial, sans-serif;
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+}

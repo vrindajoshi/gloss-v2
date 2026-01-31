@@ -1,0 +1,25 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* Extension-specific styles - isolate from host page but preserve our own styles */
+#gloss-extension-root,
+#gloss-extension-root * {
+  /* Apply Roboto Serif to all elements */
+  font-family: 'Roboto Serif', serif !important;
+}
+
+#gloss-extension-root {
+  /* Reset inherited properties from host page */
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000;
+  
+  /* Ensure extension has its own stacking context */
+  isolation: isolate;
+}
+
+/* Reset body margin manipulation for smooth transitions */
+body {
+  transition: margin-right 0.3s ease !important;
+}
