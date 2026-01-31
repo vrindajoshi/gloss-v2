@@ -10,10 +10,6 @@ const SOUND_PATH = path.join(__dirname, 'assets', 'alert.mp3');
 let lastPos = "";
 let idleTimer;
 
-console.log("✅ Script Initialized!");
-console.log("👀 Monitoring mousepad movement...");
-console.log(`🔊 Alert sound linked to: ${SOUND_PATH}`);
-
 /**
  * Uses PowerShell to get the global X,Y coordinates of the mouse
  */
