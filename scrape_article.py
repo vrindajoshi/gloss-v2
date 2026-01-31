@@ -7,11 +7,11 @@ Usage:
 Outputs JSON to stdout.
 """
 import argparse
-import sys
 import json
 import requests
 from bs4 import BeautifulSoup
 import re
+import unicodedata
 
 
 def extract_title(soup):
@@ -77,6 +77,31 @@ def scrape(url):
     soup = BeautifulSoup(html, 'html.parser')
     title = extract_title(soup)
     article = extract_article_text(soup)
+    # Clean up weird characters and control codes (preserve paragraph breaks)
+    def clean_text(s):
+        if not s:
+            return s
+        # normalize common unicode forms and replace non-breaking spaces
+        s = s.replace('\xa0', ' ')
+        s = unicodedata.normalize('NFKC', s)
+
+        # Split into paragraphs (we use double-newline as paragraph separator)
+        paras = s.split('\n\n')
+        clean_paras = []
+        for p in paras:
+            # replace replacement character and other control chars with space
+            p = p.replace('\ufffd', ' ')
+            p = re.sub(r"[\x00-\x1f\x7f-\x9f]", ' ', p)
+            # collapse multiple spaces/tabs into single space
+            p = re.sub(r'[ \t]+', ' ', p)
+            p = p.strip()
+            if p:
+                clean_paras.append(p)
+
+        return '\n\n'.join(clean_paras)
+
+    title = clean_text(title)
+    article = clean_text(article)
     return title, article
 
 

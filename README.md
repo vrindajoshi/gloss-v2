@@ -48,3 +48,24 @@ It will print JSON to stdout.
 
 - The scraper uses heuristics (<h1>, <article>, <main>, or common content classes) and may not extract perfectly for every site.
 - For more robust extraction, consider `newspaper3k` or site-specific parsers.
+
+## Chrome extension
+
+Load the Chrome extension UI (a popup) which calls the local server at `http://localhost:3000/api/scrape`.
+
+1. Start the Python + Node server:
+
+```bash
+pip install -r requirements.txt
+npm install
+npm start
+```
+
+2. Open Chrome and navigate to `chrome://extensions`
+3. Enable "Developer mode" and click "Load unpacked"
+4. Select this project folder (`c:/Users/vrind/OneDrive/Desktop/Scraper`)
+5. Click the extension icon (top-right) to open the popup, enter a URL and click "Scrape".
+
+Notes:
+- The extension posts to `http://localhost:3000/api/scrape` so the server must be running on your machine.
+- If you want the extension to call a remote API instead, update `popup.js` to point at the desired host.

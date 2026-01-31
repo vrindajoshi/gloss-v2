@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-width: 320px; }
+.container { padding: 16px; width: 360px; }
+h1 { font-size: 18px; margin-bottom: 12px; text-align: center; }
+.input-section { display: flex; gap: 8px; margin-bottom: 12px; }
+#urlInput { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+button { padding: 8px 12px; border: none; border-radius: 6px; background: #4a6cf7; color: white; cursor: pointer; }
+.loading { display: none; color: #666; margin: 8px 0; text-align: center; }
+.error { display: none; background: #ffe6e6; color: #b22; padding: 8px; border-radius: 6px; margin: 8px 0; }
+.output-section { display: none; margin-top: 12px; }
+.output-section.active { display: block; }
+.article-title { font-weight: 700; margin-bottom: 8px; border-bottom: 2px solid #4a6cf7; padding-bottom: 6px; }
+.article-body { background: #f7f7f7; padding: 8px; border-radius: 6px; white-space: pre-wrap; max-height: 240px; overflow: auto; }
+.download-btn { margin-top: 8px; background: #28a745; }

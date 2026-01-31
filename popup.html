@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Article Scraper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📰 Article Scraper</h1>
+
+    <div class="input-section">
+      <input id="urlInput" type="text" placeholder="Enter article URL" value="https://www.bbc.com/news/articles/czr4jn4621lo">
+      <button id="scrapeBtn">Scrape</button>
+    </div>
+
+    <div id="loading" class="loading">⏳ Scraping article...</div>
+    <div id="error" class="error"></div>
+
+    <div id="outputSection" class="output-section">
+      <div id="articleTitle" class="article-title"></div>
+      <div id="articleBody" class="article-body"></div>
+      <button id="downloadBtn" class="download-btn">⬇️ Download as Text</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

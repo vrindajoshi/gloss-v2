@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Article Scraper",
+  "version": "1.0.0",
+  "description": "Call local article scraper and display formatted article",
+  "permissions": ["storage", "activeTab", "tabs"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
