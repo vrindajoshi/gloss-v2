@@ -1,19 +1,26 @@
 const scrapeBtn = document.getElementById('scrapeBtn');
 const urlInput = document.getElementById('urlInput');
 const loading = document.getElementById('loading');
+const loadingText = document.getElementById('loadingText');
 const errorDiv = document.getElementById('error');
 const outputSection = document.getElementById('outputSection');
 const articleTitle = document.getElementById('articleTitle');
 const articleBody = document.getElementById('articleBody');
 const downloadBtn = document.getElementById('downloadBtn');
 const gradeButtons = document.getElementById('gradeButtons');
+const grade3 = document.getElementById('grade3');
+const grade9 = document.getElementById('grade9');
+const college = document.getElementById('college');
 
 let currentFormatted = null;
 let currentUrl = '';
+let articleText = '';
 
 function updateUrl(newUrl) {
   currentUrl = newUrl.trim();
-  urlInput.value = currentUrl;
+  if (urlInput) {
+    urlInput.value = currentUrl;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,26 +37,76 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-scrapeBtn.addEventListener('click', () => {
-  scrapeArticle();
-});
+if (scrapeBtn) {
+  scrapeBtn.addEventListener('click', () => {
+    scrapeArticle();
+  });
+}
 
-grade3.addEventListener('click', () => {
-  convertGradeThree();
-});
+if (grade3) {
+  grade3.addEventListener('click', () => {
+    translateReadingLevel(articleText, 'Grade 3');
+  });
+}
 
-grade9.addEventListener('click', () => {
-  convertGradeThree();
-});
+if (grade9) {
+  grade9.addEventListener('click', () => {
+    translateReadingLevel(articleText, 'Grade 9');
+  });
+}
 
-college.addEventListener('click', () => {
-  convertCollege();
-});
+if (college) {
+  college.addEventListener('click', () => {
+    translateReadingLevel(articleText, 'College');
+  });
+}
+
+async function translateReadingLevel(text, level) {
+  if (!text) {
+    showError('No article text to translate. Scrape an article first.');
+    return;
+  }
+
+  setLoading(true, '⏳ Translating to ' + level + '...');
+  clearError();
+
+  try {
+    const encodedText = encodeURIComponent(text);
+    const encodedLevel = encodeURIComponent(level);
+    
+    // Add timeout to fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const resp = await fetch(`http://localhost:3000/translate?text=${encodedText}&level=${encodedLevel}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const data = await resp.json();
+    if (!resp.ok || !data.result) {
+      const errorMsg = data.error || 'Translation failed';
+      return showError(errorMsg + (resp.status === 503 ? ' Try again in a moment.' : ''));
+    }
+
+    // Replace article body with translated text
+    articleBody.textContent = data.result;
+    currentFormatted = data.result;
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      showError('Translation timed out. Make sure test.mjs server is running on port 3001.');
+    } else {
+      showError(`Translation error: ${err.message}`);
+    }
+  } finally {
+    setLoading(false);
+  }
+}
 
 async function scrapeArticle() {
   if (!currentUrl) return showError('Please enter a URL');
 
-  setLoading(true);
+  setLoading(true, '⏳ Scraping article...');
   clearError();
   hideOutput();
 
@@ -65,6 +122,7 @@ async function scrapeArticle() {
 
     currentFormatted = data.formatted;
     articleTitle.textContent = data.title || 'No title';
+    articleText = data.formatted;
     articleBody.textContent = data.formatted || '';
     showOutput();
   } catch (err) {
@@ -74,9 +132,16 @@ async function scrapeArticle() {
   }
 }
 
-function setLoading(v) {
+function setLoading(v, message = '⏳ Loading...') {
   loading.style.display = v ? 'block' : 'none';
+  if (loadingText) {
+    loadingText.textContent = message;
+  }
   scrapeBtn.disabled = v;
+  if (gradeButtons) {
+    gradeButtons.style.pointerEvents = v ? 'none' : 'auto';
+    gradeButtons.style.opacity = v ? '0.5' : '1';
+  }
 }
 
 function showError(msg) {

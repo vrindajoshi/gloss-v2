@@ -11,6 +11,7 @@
     <h1>📰 Article Scraper</h1>
 
     <div class="input-section">
+      <input id="urlInput" type="text" placeholder="Enter article URL">
       <button id="scrapeBtn">Scrape</button>
     </div>
 
@@ -21,7 +22,7 @@
       <button id="college">College</button>
     </div>
 
-    <div id="loading" class="loading">⏳ Scraping article...</div>
+    <div id="loading" class="loading"><span id="loadingText">⏳ Loading...</span></div>
     <div id="error" class="error"></div>
 
     <div id="outputSection" class="output-section">
