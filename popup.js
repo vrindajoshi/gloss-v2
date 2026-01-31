@@ -8,15 +8,19 @@ const articleBody = document.getElementById('articleBody');
 const downloadBtn = document.getElementById('downloadBtn');
 
 let currentFormatted = null;
+let currentUrl = '';
+
+function updateUrl(newUrl) {
+  currentUrl = newUrl.trim();
+  urlInput.value = currentUrl;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   // When popup opens, get the active tab URL and use it
   try {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs && tabs[0] && tabs[0].url) {
-        urlInput.value = tabs[0].url;
-        // automatically scrape the current tab
-        scrapeArticle();
+        updateUrl(tabs[0].url);
       }
     });
   } catch (e) {
@@ -29,13 +33,19 @@ scrapeBtn.addEventListener('click', () => {
   scrapeArticle();
 });
 
+urlInput.addEventListener('change', (e) => {
+  updateUrl(e.target.value);
+});
+
 urlInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') scrapeArticle();
+  if (e.key === 'Enter') {
+    updateUrl(e.target.value);
+    scrapeArticle();
+  }
 });
 
 async function scrapeArticle() {
-  const url = urlInput.value.trim();
-  if (!url) return showError('Please enter a URL');
+  if (!currentUrl) return showError('Please enter a URL');
 
   setLoading(true);
   clearError();
@@ -45,7 +55,7 @@ async function scrapeArticle() {
     const resp = await fetch('http://localhost:3000/api/scrape', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ url: currentUrl })
     });
 
     const data = await resp.json();
@@ -85,13 +95,3 @@ function showOutput() {
   outputSection.classList.add('active');
 }
 
-downloadBtn.addEventListener('click', () => {
-  if (!currentFormatted) return;
-  const blob = new Blob([currentFormatted], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `article_${Date.now()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-});

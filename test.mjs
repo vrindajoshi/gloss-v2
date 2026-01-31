@@ -5,13 +5,13 @@ dotenv.config()
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GEMINI_API_KEY });
 
-async function main() {
+async function gradeThreeLevel() {
     const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: 'Why is the sky blue?',
+    contents: '',
   });
   console.log(response.text);
-  //console.log(process.env.GOOGLE_GEMINI_API_KEY);
+
 }
 
-main();
+gradeThreeLevel();
