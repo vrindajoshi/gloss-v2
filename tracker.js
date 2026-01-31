@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+const { exec, execSync } = require('child_process');
 const path = require('path');
 // Initialize the player
 const player = require('play-sound')();
@@ -9,10 +9,9 @@ const SOUND_PATH = path.join(__dirname, 'assets', 'alert.mp3');
 
 let lastPos = "";
 let idleTimer;
+let audioProcess = null;
 
-/**
- * Uses PowerShell to get the global X,Y coordinates of the mouse
- */
+
 function getMousePos() {
     try {
         const cmd = 'powershell -command "[Reflection.Assembly]::LoadWithPartialName(\'System.Windows.Forms\') | Out-Null; [System.Windows.Forms.Cursor]::Position"';
@@ -26,19 +25,30 @@ function getMousePos() {
  * Triggers the audio file
  */
 function playAlert() {
+    if (audioProcess) return;
+
     console.log("⚠️ INACTIVITY DETECTED! Playing sound...");
-    player.play(SOUND_PATH, (err) => {
-        if (err) {
-            console.error("❌ Sound Error: Ensure the file exists and a player (like Windows Media Player) is available.");
-            console.error("Error details:", err);
-        }
+    
+    // Use backticks ` here, NOT single quotes '
+    audioProcess = exec(`cmdmp3 "${SOUND_PATH}"`, (err) => {
+        audioProcess = null;
     });
+}
+
+function stopAlert() {
+    if (audioProcess) {
+        // Kills the specific background task by its Process ID (PID)
+        exec(`taskkill /F /T /PID ${audioProcess.pid}`, () => {
+            audioProcess = null;
+        });
+    }
 }
 
 /**
  * Resets the countdown timer
  */
 function resetTimer() {
+    stopAlert();
     clearTimeout(idleTimer);
     idleTimer = setTimeout(playAlert, IDLE_TIME);
 }
