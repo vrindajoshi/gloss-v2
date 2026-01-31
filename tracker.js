@@ -4,7 +4,7 @@ const path = require('path');
 const player = require('play-sound')();
 
 // CONFIGURATION
-const IDLE_TIME = 5000; // 5 seconds (5000ms)
+const IDLE_TIME = 10000; // 10 seconds (10000ms)
 const SOUND_PATH = path.join(__dirname, 'assets', 'alert.mp3');
 
 let lastPos = "";
