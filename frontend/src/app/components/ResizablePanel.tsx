@@ -216,7 +216,7 @@ export function ResizablePanel({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden bg-neutral-50">
+        <div className="flex-1 overflow-y-auto bg-neutral-50 overscroll-contain">
           {children}
         </div>
 
