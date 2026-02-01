@@ -160,25 +160,14 @@ export function ResizablePanel({
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-pink-200 bg-gradient-to-r from-pink-50 to-orange-50">
           <div className="flex items-center gap-3">
             {/* Figma Logo Container - Container3 + Text */}
-            <div 
-              className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow flex items-center justify-center"
-              style={{ backgroundImage: "linear-gradient(135deg, rgb(251, 100, 182) 0%, rgb(255, 184, 106) 100%)" }}
-              onClick={onLogoClick}
-              title="Go to home"
-            >
-              <p 
-                className="text-white font-bold"
-                style={{
-                  fontFamily: "'Arimo', 'Arimo Bold', sans-serif",
-                  fontSize: '14px',
-                  lineHeight: '20px',
-                  letterSpacing: '0.32px',
-                  fontWeight: 'bold'
-                }}
-              >
-                g
-              </p>
-            </div>
+            <img 
+  src="/image.png"
+  alt="Gloss Logo"
+  className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow object-cover"
+  onClick={onLogoClick}
+  title="Go to home"
+/>
+
             {/* Figma Heading - matches Heading component */}
             <div className="flex items-center gap-3">
               <h2 
