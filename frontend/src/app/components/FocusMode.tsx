@@ -1,6 +1,12 @@
+
 import { motion } from 'motion/react';
 import { useEffect } from 'react';
-
+function sendFocusModeMessage(action: "START_TRACKING" | "STOP_TRACKING") {
+  // This runs inside the extension iframe, so we message the active tab content script
+  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+    if (tab?.id) chrome.tabs.sendMessage(tab.id, { action });
+  });
+}
 interface FocusModeProps {
   isActive: boolean;
 }
@@ -8,18 +14,12 @@ interface FocusModeProps {
 export function FocusMode({ isActive }: FocusModeProps) {
   useEffect(() => {
     if (isActive) {
-      // Add blur to the webpage body
-      document.body.style.filter = 'blur(3px)';
-      document.body.style.transition = 'filter 0.3s ease-in-out';
+      // Tell the content script to start aura + idle tracking
+      sendFocusModeMessage("START_TRACKING");
     } else {
-      // Remove blur when focus mode is disabled
-      document.body.style.filter = '';
+      // Tell the content script to stop aura immediately
+      sendFocusModeMessage("STOP_TRACKING");
     }
-
-    // Cleanup on unmount
-    return () => {
-      document.body.style.filter = '';
-    };
   }, [isActive]);
 
   if (!isActive) return null;
