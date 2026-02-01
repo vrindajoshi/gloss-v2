@@ -3,6 +3,20 @@ import { X, GripVertical } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 // import { TextToSpeechPanel } from '@/app/components/TextToSpeechPanel';
 
+// Get logo URL from extension icons folder
+function getLogoUrl(): string {
+  try {
+    // Type assertion for chrome API
+    const chromeRuntime = (window as any).chrome?.runtime;
+    if (chromeRuntime && typeof chromeRuntime.getURL === 'function') {
+      return chromeRuntime.getURL('icons/image.png');
+    }
+  } catch (e) {
+    console.warn('Could not get logo URL:', e);
+  }
+  return '';
+}
+
 interface ResizablePanelProps {
   isOpen: boolean;
   initialWidth: number;
@@ -27,6 +41,16 @@ export function ResizablePanel({
   const [panelWidth, setPanelWidth] = useState(initialWidth);
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const logoUrl = getLogoUrl();
+  
+  // Debug: Log logo URL when component mounts
+  useEffect(() => {
+    if (logoUrl) {
+      console.log('✅ Logo URL loaded:', logoUrl);
+    } else {
+      console.warn('⚠️ Logo URL not available - chrome.runtime may not be accessible');
+    }
+  }, [logoUrl]);
 
   // Update panel width when initialWidth changes (when reopening)
   useEffect(() => {
@@ -141,13 +165,23 @@ export function ResizablePanel({
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-pink-200 bg-gradient-to-r from-pink-50 to-orange-50">
           <div className="flex items-center gap-3">
             {/* Figma Logo Container - Container3 + Text */}
-            <img 
-  src="/image.png"
-  alt="Gloss Logo"
-  className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow object-cover"
-  onClick={onLogoClick}
-  title="Go to home"
-/>
+            {logoUrl ? (
+  <img
+    src={logoUrl}
+    alt="Gloss Logo"
+    className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow object-cover"
+    onClick={onLogoClick}
+    title="Go to home"
+  />
+) : (
+  <div 
+    className="relative rounded-full shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center"
+    onClick={onLogoClick}
+    title="Go to home"
+  >
+    <span className="text-white text-xs font-bold">G</span>
+  </div>
+)}
 
             {/* Figma Heading - matches Heading component */}
             <div className="flex items-center gap-3">

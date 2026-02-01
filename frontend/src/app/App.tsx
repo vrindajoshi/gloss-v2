@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { MinimizedButton } from '@/app/components/MinimizedButton';
 import { ResizablePanel } from '@/app/components/ResizablePanel';
 import { SidePanel } from '@/app/components/SidePanel';
@@ -285,8 +285,6 @@ if (!currentUrl) {
     setArticleData(null);
     setSimplifiedText('');
     setErrorMessage('');
-<<<<<<< HEAD
-=======
     setFocusMode(false);
     
     // ✅ Notify content.js that text is unloaded
@@ -300,10 +298,6 @@ if (!currentUrl) {
       type: 'FOCUS_MODE_TOGGLE',
       enabled: false
     }, '*');
-    
-    // Stop any ongoing speech
-    stopAllSpeech();
->>>>>>> 9f27afc1add00b29417cacce2158f532bd567b34
   };
 
   // Handle reading level change - re-simplify with new level
@@ -329,9 +323,7 @@ if (!currentUrl) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      // Cleanup if needed
     };
   }, []);
 
