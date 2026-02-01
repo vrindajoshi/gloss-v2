@@ -167,4 +167,3 @@ function showOutput() {
     gradeButtons.classList.remove('hidden');
   }
 }
-

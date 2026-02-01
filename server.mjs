@@ -37,10 +37,25 @@ app.post('/api/scrape', (req, res) => {
     console.log(`Scraping: ${url}`);
 
     // Call Python scraper
-    const jsonOutput = execSync(`python3 scrape_article.py "${url}"`, {
+   let jsonOutput;
+  try {
+    // Try 'python' first
+    jsonOutput = execSync(`python scrape_article.py "${url}"`, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe']
     });
+  } catch (err) {
+    // If 'python' fails, try 'python3'
+    try {
+      jsonOutput = execSync(`python3 scrape_article.py "${url}"`, {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+    } catch (err2) {
+      // If both fail, throw the original error
+      throw err;
+    }
+  }
 
     const data = JSON.parse(jsonOutput);
 
