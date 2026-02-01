@@ -1,0 +1,31 @@
+/* Roboto Serif font */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* OpenDyslexia font for accessibility */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/fonts/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/fonts/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Apply Roboto Serif as default for the extension */
+#gloss-extension-root {
+  font-family: 'Roboto Serif', serif;
+  letter-spacing: 0.02em;
+}
+
+/* Dyslexia toggle class for content areas */
+.font-dyslexic {
+  font-family: 'OpenDyslexic', sans-serif;
+  letter-spacing: 0.02em;
+  word-spacing: 0.1em;
+  line-height: 1.8;
+}

@@ -114,7 +114,7 @@ async function scrapeArticle() {
     const resp = await fetch('http://localhost:3000/api/scrape', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: currentUrl })
+      body: JSON.stringify({ url: window.location.href })
     });
 
     const data = await resp.json();
