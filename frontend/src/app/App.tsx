@@ -77,7 +77,7 @@ export default function App() {
 
     return () => {
       if (!isInIframe) {
-        document.body.style.marginRight = '0px';
+      document.body.style.marginRight = '0px';
       }
     };
   }, [isPanelOpen, panelWidth, isInIframe]);
@@ -88,27 +88,15 @@ export default function App() {
 
   // Backend integration - Scrape article from current page
   const scrapeArticle = async (): Promise<ArticleData> => {
-    const currentUrl = window.location.href;
+    const params = new URLSearchParams(window.location.search);
+const currentUrl = params.get('src') || '';
+
+if (!currentUrl) {
+  throw new Error('Missing article URL. (No "src" param found in panel URL)');
+}
+    const BACKEND_URL = 'http://localhost:3000';
     
-    // Replace with your actual backend endpoint
-    const BACKEND_URL = 'YOUR_BACKEND_URL';
-    
-    // If backend is not configured, use mock data
-    if (BACKEND_URL === 'YOUR_BACKEND_URL') {
-      console.log('Using mock article data - configure BACKEND_URL in App.tsx to use real backend');
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock article data
-      return {
-        title: 'Climate Change: Scientists Warn of Urgent Need for Action',
-        content: `Climate scientists from around the world have issued their most urgent warning yet about the accelerating pace of global warming. The comprehensive report, released by an international panel of experts, highlights the critical need for immediate action to reduce greenhouse gas emissions.`,
-        url: currentUrl,
-        scrapedAt: new Date().toISOString(),
-      };
-    }
-    
+    try {
     const response = await fetch(`${BACKEND_URL}/api/scrape`, {
       method: 'POST',
       headers: {
@@ -117,118 +105,129 @@ export default function App() {
       body: JSON.stringify({ url: currentUrl }),
     });
 
+      // Handle network errors
     if (!response.ok) {
-      throw new Error('Failed to scrape article');
-    }
+        let errorMessage = 'Failed to scrape article';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || `Server returned ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
 
-    return await response.json();
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to scrape article');
+      }
+
+      // Validate that we have actual content
+      if (!data.article && !data.formatted) {
+        throw new Error('No article content was returned from the server');
+      }
+
+      if (!data.title) {
+        throw new Error('No article title was returned from the server');
+      }
+
+      return {
+        title: data.title,
+        content: data.article || data.formatted || '',
+        url: currentUrl,
+        scrapedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error('Scraping error:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:3000');
+      }
+      
+      throw error instanceof Error ? error : new Error('Failed to scrape article');
+    }
   };
 
-  // Backend integration - Simplify article text
+  // Backend integration - Simplify article text using translation endpoint
   const simplifyArticle = async (content: string, level: number): Promise<SimplificationResponse> => {
-    // Replace with your actual backend endpoint
-    const BACKEND_URL = 'YOUR_BACKEND_URL';
+    const BACKEND_URL = 'http://localhost:3000';
     
-    // If backend is not configured, use mock simplification
-    if (BACKEND_URL === 'YOUR_BACKEND_URL') {
-      console.log('Using mock simplification - configure BACKEND_URL in App.tsx to use real backend');
+    // Validate input
+    if (!content || content.trim().length === 0) {
+      throw new Error('No content provided to simplify');
+    }
+    
+    // Map reading level number to grade string
+    const levelMap: Record<number, string> = {
+      4: 'Grade 4',
+      6: 'Grade 6',
+      9: 'Grade 9',
+      12: 'Grade 12',
+      16: 'College',
+    };
+    
+    const levelString = levelMap[level] || 'Grade 9';
+    
+    try {
+      // Encode text and level for URL
+      const encodedText = encodeURIComponent(content);
+      const encodedLevel = encodeURIComponent(levelString);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Add timeout to fetch (5 minutes)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000);
       
-      // Mock simplified text based on reading level
-      const simplifiedVersions: Record<number, string> = {
-        4: `Scientists say Earth is getting too hot. They studied the weather all over the world. The Earth is 1.1 degrees hotter than it used to be.
+      const response = await fetch(
+        `${BACKEND_URL}/translate?text=${encodedText}&level=${encodedLevel}`,
+        {
+          method: 'GET',
+          signal: controller.signal,
+        }
+      );
+      
+      clearTimeout(timeoutId);
 
-"The Earth is changing very fast," said Dr. Sarah Chen. She is a scientist who helped write the report. "We need to act quickly to help our planet."
+      // Handle network errors
+      if (!response.ok) {
+        let errorMessage = 'Translation failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+          const is503 = response.status === 503 || errorMessage.includes('overloaded');
+          if (is503) {
+            errorMessage += ' Try again in a moment.';
+          }
+        } catch {
+          errorMessage = response.statusText || `Server returned ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
 
-The report talks about bad things that are happening. The oceans are getting higher. Some places are getting too much rain. Other places don't have enough water. Animals and plants are having trouble living in their homes.
-
-But scientists say we can still help! "Every little bit helps," Dr. Chen said. "What we do now will make the world better for kids in the future."
-
-We need to use clean energy like wind and solar power. We need to take care of forests and oceans. We have to stop using dirty fuels that make the air bad.
-
-"We know what to do," the report says. "Now we just need everyone to work together to fix this problem."`,
-        
-        6: `Climate scientists from around the world have released an important report about global warming. They say Earth's temperature is rising faster than ever before. More than 200 scientists from 65 countries worked together on this study.
-
-The Earth has gotten 1.1 degrees Celsius warmer since the 1800s. The biggest temperature increases are happening at the North and South Poles.
-
-"Our planet's climate is changing in ways we can clearly see," said Dr. Sarah Chen, the main author of the report. "We still have time to prevent the worst problems, but we need to act quickly."
-
-The report describes several worrying problems. Ocean levels are rising, causing flooding in coastal cities. Extreme weather like hurricanes and heat waves are becoming more common. Droughts are making it harder for farmers to grow food.
-
-However, the scientists believe we can still make things better. "Every bit of warming we can prevent makes a difference," Dr. Chen explained. "The decisions we make now will affect future generations."
-
-The scientists recommend switching from fossil fuels to clean energy, protecting forests and oceans, and investing in solar and wind power. While the challenge is big, new technology and increased awareness give us hope.
-
-"We already have the tools we need to solve this problem," the report says. "Now we need leaders and citizens to take action."`,
-        
-        9: `An international team of climate scientists has issued an urgent warning about the accelerating pace of global warming. Their comprehensive report synthesizes research from over 200 experts across 65 nations and presents strong evidence that Earth's climate is changing at an unprecedented rate.
-
-Global temperatures have increased by 1.1 degrees Celsius since pre-industrial times, with the most dramatic changes occurring in polar regions. These changes are affecting weather patterns, sea levels, and ecosystems worldwide.
-
-"The evidence is unequivocal—our climate system is undergoing changes that are, in many cases, irreversible," stated Dr. Sarah Chen, the report's lead author. "While the situation is serious, we still have a narrow window of opportunity to prevent the most severe consequences if we act decisively."
-
-The report documents multiple concerning trends: rising sea levels threatening coastal populations, increased frequency of extreme weather events, and significant disruptions to natural ecosystems. Agricultural regions are experiencing unprecedented droughts and heat waves, while flooding has become more common in many areas.
-
-Despite these challenges, the scientists emphasize that our future is not predetermined. "Every fraction of a degree matters," Dr. Chen noted. "The choices we make this decade will fundamentally shape the world inherited by future generations."
-
-The report advocates for rapid transition to renewable energy, ecosystem protection and restoration, and substantial investment in clean technology. While acknowledging the magnitude of the challenge, the scientists cite recent technological progress and growing public engagement as encouraging signs.
-
-"We possess both the knowledge and technology necessary to address this crisis," the report concludes. "What's required now is the political will and coordinated action to implement solutions at the necessary scale."`,
-        
-        12: `Climate scientists worldwide have released their most urgent assessment yet regarding accelerating global warming. The comprehensive analysis, compiled by an international panel of more than 200 researchers from 65 countries, presents compelling evidence that Earth's climate system is experiencing unprecedented transformation.
-
-Average global temperatures have risen 1.1 degrees Celsius above pre-industrial baselines, with particularly pronounced increases in polar regions. These changes are manifesting in altered weather patterns, rising sea levels, and widespread ecological disruptions.
-
-"The data demonstrates unequivocal changes to our climate system, many of which are effectively irreversible on human timescales," explained Dr. Sarah Chen, the report's principal author. "However, a critical window remains for preventing the most catastrophic outcomes, provided we implement immediate and decisive action."
-
-The assessment documents several alarming trends: accelerating sea-level rise threatening coastal infrastructure, intensifying extreme weather phenomena, and cascading effects throughout natural ecosystems. Agricultural systems face unprecedented stress from droughts and heat extremes, while flooding events have increased in frequency and severity across multiple regions.
-
-Nevertheless, the scientific community maintains that future trajectories remain malleable. "Temperature increases are not binary—every increment of warming prevented translates to reduced impacts," Dr. Chen emphasized. "Contemporary decisions will fundamentally determine environmental conditions for subsequent generations."
-
-The report advocates comprehensive decarbonization of energy systems, protection and restoration of natural carbon sinks, and accelerated deployment of renewable technologies. While acknowledging formidable challenges, researchers identify recent technological advances and heightened public awareness as sources of cautious optimism.
-
-"The requisite knowledge and technological capacity exist to address this challenge," the report states. "What remains essential is mobilizing political commitment and coordinated implementation at appropriate scales."`,
-        
-        16: `An international consortium of climate scientists has issued their most urgent assessment to date regarding the acceleration of anthropogenic global warming. This comprehensive synthesis, incorporating research from over 200 scientific experts across 65 nations, presents robust empirical evidence demonstrating that Earth's climate system is undergoing transformation at rates unprecedented in the geological record.
-
-Global mean surface temperatures have increased 1.1°C relative to pre-industrial baselines, with amplified warming trends particularly evident in high-latitude regions. These thermal anomalies are driving cascading effects across multiple Earth systems, including atmospheric circulation patterns, cryospheric dynamics, and biogeochemical cycles.
-
-"The observational data provides unequivocal evidence of systematic climate perturbation, with many transitions exhibiting characteristics of irreversibility within human-relevant timescales," stated Dr. Sarah Chen, principal investigator for the assessment. "Nonetheless, a critical temporal window persists for averting the most severe projected outcomes, contingent upon immediate implementation of comprehensive mitigation strategies."
-
-The assessment documents multiple concerning trajectories: accelerating eustatic sea-level rise threatening low-elevation coastal infrastructure, intensification of hydrometeorological extremes, and widespread ecosystem state transitions. Agricultural systems are experiencing unprecedented thermal and hydrological stress, while pluvial and fluvial flooding events demonstrate increased frequency and magnitude across diverse geographical contexts.
-
-However, the scientific community emphasizes the non-deterministic nature of future climate trajectories. "Climate sensitivity functions continuously—each fractional degree of avoided warming corresponds to proportional reduction in adverse impacts," Dr. Chen noted. "Contemporary policy decisions will fundamentally constrain boundary conditions for future generations."
-
-The report advocates rapid decarbonization of global energy infrastructure, conservation and enhancement of terrestrial and marine carbon sequestration capacity, and accelerated deployment of renewable energy technologies. While acknowledging substantial socioeconomic and technical challenges, researchers cite recent innovations in clean energy systems and evolving societal prioritization as grounds for measured optimism.
-
-"The scientific understanding and technological capabilities necessary to address this existential challenge are well-established," the assessment concludes. "Critical requirements now center on mobilizing sufficient political will and implementing coordinated interventions at scales commensurate with the magnitude of the threat."`,
-      };
+      const data = await response.json();
+      
+      if (!data.result || data.result.trim().length === 0) {
+        throw new Error('Translation failed - no result returned from the server');
+      }
       
       return {
-        simplifiedText: simplifiedVersions[level] || simplifiedVersions[9],
+        simplifiedText: data.result,
         readingLevel: level,
       };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Translation timed out. Make sure the server is running on http://localhost:3000');
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:3000');
+      }
+      
+      console.error('Translation error:', error);
+      throw error instanceof Error ? error : new Error('Failed to simplify article');
     }
-    
-    const response = await fetch(`${BACKEND_URL}/api/simplify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        text: content,
-        readingLevel: level,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to simplify article');
-    }
-
-    return await response.json();
   };
 
   // Handle simplify button click
@@ -250,11 +249,17 @@ The report advocates rapid decarbonization of global energy infrastructure, cons
     } catch (error) {
       console.error('Error processing article:', error);
       setProcessingState('error');
-      setErrorMessage(
-        error instanceof Error 
+      
+      // Clear any placeholder data
+      setArticleData(null);
+      setSimplifiedText('');
+      
+      // Set clear error message
+      const errorMsg = error instanceof Error 
           ? error.message 
-          : "This page format isn't supported yet. We're working on adding support for more article types."
-      );
+        : "Failed to process article. Please check that the backend server is running.";
+      
+      setErrorMessage(errorMsg);
     }
   };
 

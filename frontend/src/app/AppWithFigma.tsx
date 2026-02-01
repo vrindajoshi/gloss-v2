@@ -80,85 +80,141 @@ export default function AppWithFigma() {
 
   // Backend integration - Scrape article from current page
   const scrapeArticle = async (): Promise<ArticleData> => {
-    const currentUrl = window.location.href;
+    const params = new URLSearchParams(window.location.search);
+const currentUrl = params.get('src') || window.location.href;
+    const BACKEND_URL = 'http://localhost:3000';
     
-    // Replace with your actual backend endpoint
-    const BACKEND_URL = 'YOUR_BACKEND_URL';
-    
-    // If backend is not configured, use mock data
-    if (BACKEND_URL === 'YOUR_BACKEND_URL') {
-      console.log('Using mock article data - configure BACKEND_URL in App.tsx to use real backend');
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/scrape`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: currentUrl }),
+      });
+
+      // Handle network errors
+      if (!response.ok) {
+        let errorMessage = 'Failed to scrape article';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = response.statusText || `Server returned ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock article data
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to scrape article');
+      }
+
+      // Validate that we have actual content - no placeholders
+      if (!data.article && !data.formatted) {
+        throw new Error('No article content was returned from the server');
+      }
+
+      if (!data.title) {
+        throw new Error('No article title was returned from the server');
+      }
+
       return {
-        title: 'Climate Change: Scientists Warn of Urgent Need for Action',
-        content: `Climate scientists from around the world have issued their most urgent warning yet about the accelerating pace of global warming. The comprehensive report, released by an international panel of experts, highlights the critical need for immediate action to reduce greenhouse gas emissions.`,
+        title: data.title,
+        content: data.article || data.formatted || '',
         url: currentUrl,
         scrapedAt: new Date().toISOString(),
       };
+    } catch (error) {
+      console.error('Scraping error:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:3000');
+      }
+      
+      throw error instanceof Error ? error : new Error('Failed to scrape article');
     }
-    
-    const response = await fetch(`${BACKEND_URL}/api/scrape`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ url: currentUrl }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to scrape article');
-    }
-
-    return await response.json();
   };
 
-  // Backend integration - Simplify article text
+  // Backend integration - Simplify article text using translation endpoint
   const simplifyArticle = async (content: string, level: number): Promise<SimplificationResponse> => {
-    // Replace with your actual backend endpoint
-    const BACKEND_URL = 'YOUR_BACKEND_URL';
+    const BACKEND_URL = 'http://localhost:3000';
     
-    // If backend is not configured, use mock simplification
-    if (BACKEND_URL === 'YOUR_BACKEND_URL') {
-      console.log('Using mock simplification - configure BACKEND_URL in App.tsx to use real backend');
+    // Validate input
+    if (!content || content.trim().length === 0) {
+      throw new Error('No content provided to simplify');
+    }
+    
+    // Map reading level number to grade string
+    const levelMap: Record<number, string> = {
+      4: 'Grade 4',
+      6: 'Grade 6',
+      9: 'Grade 9',
+      12: 'Grade 12',
+      16: 'College',
+    };
+    
+    const levelString = levelMap[level] || 'Grade 9';
+    
+    try {
+      // Encode text and level for URL
+      const encodedText = encodeURIComponent(content);
+      const encodedLevel = encodeURIComponent(levelString);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Add timeout to fetch (5 minutes)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000);
       
-      // Mock simplified text based on reading level
-      const simplifiedVersions: Record<number, string> = {
-        4: `Scientists say Earth is getting too hot. They studied the weather all over the world. The Earth is 1.1 degrees hotter than it used to be.`,
-        6: `Climate scientists from around the world have released an important report about global warming. They say Earth's temperature is rising faster than ever before.`,
-        9: `An international team of climate scientists has issued an urgent warning about the accelerating pace of global warming. Their comprehensive report synthesizes research from over 200 experts across 65 nations.`,
-        12: `Climate scientists worldwide have released their most urgent assessment yet regarding accelerating global warming. The comprehensive analysis presents compelling evidence that Earth's climate system is experiencing unprecedented transformation.`,
-        16: `An international consortium of climate scientists has issued their most urgent assessment to date regarding the acceleration of anthropogenic global warming. This comprehensive synthesis incorporates research from over 200 scientific experts.`,
-      };
+      const response = await fetch(
+        `${BACKEND_URL}/translate?text=${encodedText}&level=${encodedLevel}`,
+        {
+          method: 'GET',
+          signal: controller.signal,
+        }
+      );
       
+      clearTimeout(timeoutId);
+
+      // Handle network errors
+      if (!response.ok) {
+        let errorMessage = 'Translation failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+          const is503 = response.status === 503 || errorMessage.includes('overloaded');
+          if (is503) {
+            errorMessage += ' Try again in a moment.';
+          }
+        } catch {
+          errorMessage = response.statusText || `Server returned ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      
+      if (!data.result || data.result.trim().length === 0) {
+        throw new Error('Translation failed - no result returned from the server');
+      }
+
       return {
-        simplifiedText: simplifiedVersions[level] || simplifiedVersions[9],
+        simplifiedText: data.result,
         readingLevel: level,
       };
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Translation timed out. Make sure the server is running on http://localhost:3000');
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Cannot connect to server. Make sure the backend server is running on http://localhost:3000');
+      }
+      
+      console.error('Translation error:', error);
+      throw error instanceof Error ? error : new Error('Failed to simplify article');
     }
-    
-    const response = await fetch(`${BACKEND_URL}/api/simplify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        text: content,
-        readingLevel: level,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to simplify article');
-    }
-
-    return await response.json();
   };
 
   // Handle simplify button click
@@ -180,11 +236,17 @@ export default function AppWithFigma() {
     } catch (error) {
       console.error('Error processing article:', error);
       setProcessingState('error');
-      setErrorMessage(
-        error instanceof Error 
-          ? error.message 
-          : "This page format isn't supported yet. We're working on adding support for more article types."
-      );
+      
+      // Clear any placeholder data
+      setArticleData(null);
+      setSimplifiedText('');
+      
+      // Set clear error message
+      const errorMsg = error instanceof Error 
+        ? error.message 
+        : "Failed to process article. Please check that the backend server is running.";
+      
+      setErrorMessage(errorMsg);
     }
   };
 

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Play, Pause, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/app/components/ui/button';
+import { Button } from './ui/button';
 
 interface TextToSpeechPanelProps {
   isPlaying: boolean;

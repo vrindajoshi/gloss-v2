@@ -109,7 +109,9 @@
     // Create the iframe
     iframe = document.createElement('iframe');
     iframe.id = 'gloss-iframe';
-    iframe.src = chrome.runtime.getURL('dist/index.html?mode=panel');
+    iframe.src = chrome.runtime.getURL(
+      'dist/index.html?mode=panel&src=' + encodeURIComponent(window.location.href)
+    );
     iframe.style.cssText = `
       position: fixed;
       top: 0;

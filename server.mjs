@@ -37,7 +37,7 @@ app.post('/api/scrape', (req, res) => {
     console.log(`Scraping: ${url}`);
 
     // Call Python scraper
-    const jsonOutput = execSync(`python scrape_article.py "${url}"`, {
+    const jsonOutput = execSync(`python3 scrape_article.py "${url}"`, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe']
     });
