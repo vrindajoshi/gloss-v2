@@ -86,6 +86,19 @@ export default function App() {
     setPanelWidth(width);
   };
 
+  // Handle focus mode toggle with messaging
+  const handleFocusModeChange = (enabled: boolean) => {
+    setFocusMode(enabled);
+    
+    console.log(`🎯 Focus mode ${enabled ? 'enabled' : 'disabled'}`);
+    
+    // Send message to content.js on the parent page
+    window.parent.postMessage({
+      type: 'FOCUS_MODE_TOGGLE',
+      enabled: enabled
+    }, '*');
+  };
+
   // Backend integration - Scrape article from current page
   const scrapeArticle = async (): Promise<ArticleData> => {
     const params = new URLSearchParams(window.location.search);
@@ -246,6 +259,12 @@ if (!currentUrl) {
       
       // Done!
       setProcessingState('ready');
+      
+      // ✅ Notify content.js that text is loaded
+      console.log('📄 Text loaded, notifying content.js');
+      window.parent.postMessage({
+        type: 'TEXT_LOADED'
+      }, '*');
     } catch (error) {
       console.error('Error processing article:', error);
       setProcessingState('error');
@@ -273,10 +292,24 @@ if (!currentUrl) {
 
   // Handle logo click to return home
   const handleLogoClick = () => {
+    // Reset to home screen
     setProcessingState('idle');
-    setSimplifiedText('');
     setArticleData(null);
+    setSimplifiedText('');
     setErrorMessage('');
+    setFocusMode(false);
+    
+    // ✅ Notify content.js that text is unloaded
+    console.log('📄 Text cleared, notifying content.js');
+    window.parent.postMessage({
+      type: 'TEXT_UNLOADED'
+    }, '*');
+    
+    // Also disable focus mode
+    window.parent.postMessage({
+      type: 'FOCUS_MODE_TOGGLE',
+      enabled: false
+    }, '*');
     
     // Stop any ongoing speech
     stopAllSpeech();
@@ -770,7 +803,7 @@ if (!currentUrl) {
         dyslexiaFont={dyslexiaFont}
         onDyslexiaFontChange={setDyslexiaFont}
         focusMode={focusMode}
-        onFocusModeChange={setFocusMode}
+        onFocusModeChange={handleFocusModeChange}
         onSimplify={handleSimplify}
         isSimplified={processingState === 'ready'}
       />
