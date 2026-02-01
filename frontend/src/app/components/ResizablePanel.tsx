@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { X, GripVertical } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
 import { TextToSpeechPanel } from '@/app/components/TextToSpeechPanel';
-import glossLogo from 'figma:asset/6a4e64c69d84356d6cb8df76ab71188bc98ed82e.png';
 
 interface ResizablePanelProps {
   isOpen: boolean;
@@ -103,7 +102,26 @@ export function ResizablePanel({
     setIsResizing(true);
   };
 
+  // Handle close button click - send postMessage if in iframe
+  const handleClose = () => {
+    // If we're in an iframe (embedded on a page), send message to parent
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'GLOSS_CLOSE' }, '*');
+    }
+    // Always call the onClose handler
+    onClose();
+  };
+
   if (!isOpen) return null;
+
+  // Check if we're in an iframe
+  const isInIframe = typeof window !== 'undefined' && (() => {
+    try {
+      return window.parent !== window;
+    } catch (e) {
+      return true;
+    }
+  })();
 
   // Map reading level to label
   const levels = [
@@ -118,8 +136,13 @@ export function ResizablePanel({
   return (
     <div
       ref={panelRef}
-      className="fixed top-3 bottom-3 right-0 bg-neutral-50 shadow-2xl flex border-l-2 border-pink-300 z-[9999] overflow-hidden rounded-[15px]"
-      style={{ width: panelWidth }}
+      className={`${isInIframe ? 'absolute' : 'fixed'} top-0 right-0 bg-neutral-50 shadow-2xl flex border-l-2 border-pink-300 z-[9999] overflow-hidden ${isInIframe ? 'rounded-l-[15px]' : 'rounded-[15px]'}`}
+      style={{ 
+        width: panelWidth,
+        height: isInIframe ? '100vh' : 'calc(100vh - 24px)',
+        top: isInIframe ? 0 : '12px',
+        bottom: isInIframe ? 0 : '12px'
+      }}
     >
       {/* Resize Handle */}
       <div
@@ -133,21 +156,44 @@ export function ResizablePanel({
 
       {/* Panel Content */}
       <div className="flex-1 flex flex-col overflow-hidden bg-white w-full">
-        {/* Header */}
+        {/* Header - Using Figma Maker styling */}
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-pink-200 bg-gradient-to-r from-pink-50 to-orange-50">
           <div className="flex items-center gap-3">
+            {/* Figma Logo Container - Container3 + Text */}
             <div 
-              className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
+              className="relative rounded-[10px] shrink-0 size-[32px] cursor-pointer hover:shadow-md transition-shadow flex items-center justify-center"
+              style={{ backgroundImage: "linear-gradient(135deg, rgb(251, 100, 182) 0%, rgb(255, 184, 106) 100%)" }}
               onClick={onLogoClick}
               title="Go to home"
             >
-              <img src={glossLogo} alt="Gloss Logo" className="w-full h-full object-cover rounded-full" />
+              <p 
+                className="text-white font-bold"
+                style={{
+                  fontFamily: "'Arimo', 'Arimo Bold', sans-serif",
+                  fontSize: '14px',
+                  lineHeight: '20px',
+                  letterSpacing: '0.32px',
+                  fontWeight: 'bold'
+                }}
+              >
+                g
+              </p>
             </div>
+            {/* Figma Heading - matches Heading component */}
             <div className="flex items-center gap-3">
               <h2 
-                className="text-2xl font-bold text-neutral-900 cursor-pointer hover:text-pink-600 transition-colors"
+                className="cursor-pointer hover:text-pink-600 transition-colors"
                 onClick={onLogoClick}
                 title="Go to home"
+                style={{
+                  fontFamily: "'Roboto Serif', 'Roboto_Serif Bold', serif",
+                  fontSize: '18px',
+                  lineHeight: '28px',
+                  fontWeight: 'bold',
+                  color: '#171717',
+                  letterSpacing: '0.32px',
+                  fontVariationSettings: "'GRAD' 0, 'wdth' 100"
+                }}
               >
                 Gloss
               </h2>
@@ -162,7 +208,7 @@ export function ResizablePanel({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onClose}
+            onClick={handleClose}
             className="h-8 w-8 hover:bg-pink-100"
           >
             <X className="w-5 h-5" />

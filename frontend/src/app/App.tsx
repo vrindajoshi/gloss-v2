@@ -24,7 +24,16 @@ interface SimplificationResponse {
 type ProcessingState = 'idle' | 'scraping' | 'simplifying' | 'ready' | 'error';
 
 export default function App() {
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  // Open panel by default if we're in an iframe (embedded on a page)
+  const [isPanelOpen, setIsPanelOpen] = useState(() => {
+    // Check if we're in an iframe
+    try {
+      return window.parent !== window;
+    } catch (e) {
+      // Cross-origin iframe, assume we're embedded
+      return true;
+    }
+  });
   const [panelWidth, setPanelWidth] = useState(480);
   const [readingLevel, setReadingLevel] = useState(9);
   const [dyslexiaFont, setDyslexiaFont] = useState(false);
@@ -47,9 +56,19 @@ export default function App() {
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
   const intervalRef = useRef<number | null>(null);
 
-  // Push website content when panel opens
+  // Check if we're in an iframe
+  const isInIframe = typeof window !== 'undefined' && (() => {
+    try {
+      return window.parent !== window;
+    } catch (e) {
+      // Cross-origin iframe
+      return true;
+    }
+  })();
+
+  // Push website content when panel opens (only in popup mode, not iframe)
   useEffect(() => {
-    if (isPanelOpen) {
+    if (!isInIframe && isPanelOpen) {
       document.body.style.marginRight = `${panelWidth}px`;
       document.body.style.transition = 'margin-right 0.3s ease';
     } else {
@@ -57,9 +76,11 @@ export default function App() {
     }
 
     return () => {
-      document.body.style.marginRight = '0px';
+      if (!isInIframe) {
+        document.body.style.marginRight = '0px';
+      }
     };
-  }, [isPanelOpen, panelWidth]);
+  }, [isPanelOpen, panelWidth, isInIframe]);
 
   const handlePanelWidthChange = (width: number) => {
     setPanelWidth(width);
@@ -752,9 +773,17 @@ The report advocates rapid decarbonization of global energy infrastructure, cons
   };
 
   return (
-    <div id="gloss-extension-root">
-      {/* Minimized Button */}
-      {!isPanelOpen && (
+    <div 
+      id="gloss-extension-root"
+      style={{
+        width: '100%',
+        height: isInIframe ? '100vh' : 'auto',
+        position: isInIframe ? 'relative' : 'static',
+        overflow: isInIframe ? 'hidden' : 'visible'
+      }}
+    >
+      {/* Minimized Button - only show in popup mode */}
+      {!isInIframe && !isPanelOpen && (
         <MinimizedButton onClick={() => setIsPanelOpen(true)} />
       )}
 
