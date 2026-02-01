@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, GripVertical } from 'lucide-react';
 import { Button } from '@/app/components/ui/button';
-import { TextToSpeechPanel } from '@/app/components/TextToSpeechPanel';
+// import { TextToSpeechPanel } from '@/app/components/TextToSpeechPanel';
 
 interface ResizablePanelProps {
   isOpen: boolean;
@@ -12,16 +12,6 @@ interface ResizablePanelProps {
   onLogoClick?: () => void;
   readingLevel?: number;
   showReadingLevel?: boolean;
-  // Text-to-speech props
-  showTTS?: boolean;
-  ttsIsPlaying?: boolean;
-  ttsCurrentTime?: number;
-  ttsDuration?: number;
-  ttsSelectedVoice?: string;
-  ttsPlaybackSpeed?: number;
-  onTTSPlayPause?: () => void;
-  onTTSSpeedChange?: (speed: number) => void;
-  onTTSVoiceChange?: (voice: string) => void;
 }
 
 export function ResizablePanel({ 
@@ -33,15 +23,6 @@ export function ResizablePanel({
   onLogoClick,
   readingLevel,
   showReadingLevel = true,
-  showTTS = false,
-  ttsIsPlaying = false,
-  ttsCurrentTime = 0,
-  ttsDuration = 0,
-  ttsSelectedVoice = 'Vrinda',
-  ttsPlaybackSpeed = 1.0,
-  onTTSPlayPause,
-  onTTSSpeedChange,
-  onTTSVoiceChange,
 }: ResizablePanelProps) {
   const [panelWidth, setPanelWidth] = useState(initialWidth);
   const [isResizing, setIsResizing] = useState(false);
@@ -209,19 +190,7 @@ export function ResizablePanel({
           {children}
         </div>
 
-        {/* Text-to-Speech Panel at Bottom */}
-        {showTTS && onTTSPlayPause && onTTSSpeedChange && onTTSVoiceChange && (
-          <TextToSpeechPanel
-            isPlaying={ttsIsPlaying}
-            currentTime={ttsCurrentTime}
-            duration={ttsDuration}
-            selectedVoice={ttsSelectedVoice}
-            playbackSpeed={ttsPlaybackSpeed}
-            onPlayPause={onTTSPlayPause}
-            onSpeedChange={onTTSSpeedChange}
-            onVoiceChange={onTTSVoiceChange}
-          />
-        )}
+        {/* TTS navbar removed */}
       </div>
     </div>
   );
