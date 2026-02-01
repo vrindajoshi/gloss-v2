@@ -10,10 +10,7 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://www.bbc.com/*",
-        "https://www.bbc.co.uk/*"
-      ],
+      "matches": ["<all_urls>"],
       "js": ["inject.js", "content.js", "audiotrack.js"],
       "css": ["style.css"],
       "run_at": "document_end"
@@ -28,10 +25,7 @@
         "icons/*",
         "assets/alert.mp3"
       ],
-      "matches": [
-        "https://www.bbc.com/*",
-        "https://www.bbc.co.uk/*"
-      ]
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {

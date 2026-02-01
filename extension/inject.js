@@ -42,7 +42,7 @@
   function createMinimizedButton() {
     if (minimizedButton) return;
 
-    const logoUrl = chrome.runtime.getURL('icons/GlossLogo48.png');
+    const logoUrl = chrome.runtime.getURL('icons/GlossLogo128.png');
 
     minimizedButton = document.createElement('div');
     minimizedButton.id = 'gloss-minimized-button';
@@ -56,8 +56,9 @@
           width: 56px;
           height: 56px;
           border-radius: 50%;
+          background-color: white;
           background-image: url('${logoUrl}');
-          background-size: cover;
+          background-size: 100% 100%;
           background-position: center;
           background-repeat: no-repeat;
           border: none;
@@ -68,6 +69,9 @@
           align-items: center;
           justify-content: center;
           overflow: hidden;
+          padding: 0;
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: pixelated;
         "
         aria-label="Open Gloss panel"
       >
