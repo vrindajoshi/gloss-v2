@@ -1,71 +1,91 @@
-Article Scraper
+# Gloss — A Softer Way To Read
 
-This project fetches a news article URL, extracts the title and body text via Python, and writes it to a text file via Node.js.
+For some of us, reading feels effortless. It’s so natural we don’t even remember learning how to do it. We read to understand, to unwind, to get lost in a story, or to feel a sense of comfort when things are hard. But unfortunately, that isn’t everyone’s reality.
+For many people, reading feels like a constant struggle, like swimming against a current that never lets up. Every sentence takes effort, and every page feels exhausting.
 
-## Architecture
+In Canada, this struggle is more common than we think. According to Statistics Canada, 49% of adults read below high-school literacy levels. Many live with learning differences like dyslexia or ADHD, while newcomers, Indigenous peoples, and low-income communities face added barriers that make reading even more difficult. These challenges are often invisible, but they shape these experiences in powerful ways.
 
-- **scrape_article.py** – Python script that scrapes a URL and returns JSON with title and article
-- **scraper.js** – Node.js script that calls the Python scraper and writes formatted output to a text file
-- **output.txt** – The final text file with the article
+Gloss was created with these realities in mind, and with a vision of changing these statistics for the better. It’s not about fixing readers or asking them to adapt to systems that weren’t built for them. It’s about adjusting the reading experience itself, making space for different needs, paces, and ways of understanding. Our goal is to help make reading feel possible again, because everyone deserves access to language, knowledge, and confidence.
 
-## Prerequisites
+---
 
+## ✨ Features
+
+- Chrome extension for scraping articles
+- React frontend for simplified reading
+- Article extraction with title + content
+- Accessibility-focused, Warm and Cozy UI
+
+---
+
+## ⚙️ Prerequisites
+
+### General
+- Node.js v18+ (recommended)
+- npm v9+
 - Python 3.8+
-- Node.js 14+
-- Install Python dependencies:
 
+### Python Dependencies
+Install required Python packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+---
 
-Run the Node.js script to scrape and save to a file:
+## 🚀 Getting Started
 
+### 1. Clone the Repository
 ```bash
-node scraper.js https://www.bbc.com/news/articles/czr4jn4621lo output.txt
+git clone <your-repo-url>
+cd <repo-folder>
 ```
 
-If no URL is provided, it defaults to the BBC URL above. If no output file is specified, it defaults to `output.txt`.
+---
 
-Check the output:
-
-```bash
-cat output.txt
-```
-
-## Direct Python Usage
-
-You can also call the Python scraper directly:
+### 2. Frontend Setup
 
 ```bash
-python scrape_article.py https://www.bbc.com/news/articles/czr4jn4621lo
-```
-
-It will print JSON to stdout.
-
-## Notes
-
-- The scraper uses heuristics (<h1>, <article>, <main>, or common content classes) and may not extract perfectly for every site.
-- For more robust extraction, consider `newspaper3k` or site-specific parsers.
-
-## Chrome extension
-
-Load the Chrome extension UI (a popup) which calls the local server at `http://localhost:3000/api/scrape`.
-
-1. Start the Python + Node server:
-
-```bash
-pip install -r requirements.txt
+cd frontend
 npm install
-npm start
 ```
 
-2. Open Chrome and navigate to `chrome://extensions`
-3. Enable "Developer mode" and click "Load unpacked"
-4. Select this project folder (`c:/Users/vrind/OneDrive/Desktop/Scraper`)
-5. Click the extension icon (top-right) to open the popup, enter a URL and click "Scrape".
+Start the development server (hot reload):
+```bash
+npm run dev
+```
 
-Notes:
-- The extension posts to `http://localhost:3000/api/scrape` so the server must be running on your machine.
-- If you want the extension to call a remote API instead, update `popup.js` to point at the desired host.
+Build for production:
+```bash
+npm run build
+```
+
+The production build will be output to:
+```text
+frontend/dist
+```
+
+Preview the production build:
+```bash
+npm run preview
+```
+
+---
+
+### 3. Backend (Python Scraper)
+
+Run the Python scraper directly:
+```bash
+python scrape_article.py
+```
+
+Ensure Python is installed and available in your system PATH.
+
+---
+
+### 4. Chrome Extension
+
+1. Open `chrome://extensions`
+2. Enable **Developer Mode**
+3. Click **Load unpacked**
+4. Select the `extension/` folder
